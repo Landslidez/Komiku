@@ -87,7 +87,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Komiku - Semua Komik"),
+        title: const Text("Komiku"),
         backgroundColor: const Color.fromARGB(255, 103, 58, 183),
         foregroundColor: Colors.white,
         actions: [
@@ -102,7 +102,6 @@ class _HomePageState extends State<HomePage> {
       drawer: Drawer(
         child: Column(
           children: [
-            // Header Akun User
             UserAccountsDrawerHeader(
               decoration: const BoxDecoration(
                 color: Color.fromARGB(255, 103, 58, 183),
@@ -157,7 +156,7 @@ class _HomePageState extends State<HomePage> {
                 Icons.home,
                 color: Color.fromARGB(255, 103, 58, 183),
               ),
-              title: const Text("Semua Komik"),
+              title: const Text("Beranda"),
               onTap: () {
                 Navigator.pop(context);
               },
@@ -168,7 +167,7 @@ class _HomePageState extends State<HomePage> {
                 Icons.category,
                 color: Color.fromARGB(255, 103, 58, 183),
               ),
-              title: const Text("Lihat per Kategori"),
+              title: const Text("Kategori"),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.push(

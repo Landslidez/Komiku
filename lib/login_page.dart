@@ -24,8 +24,6 @@ class _LoginPageState extends State<LoginPage> {
     setState(() {
       _isLoading = true;
     });
-
-    // Sesuaikan dengan URL ubaya.cloud kelompokmu
     final url = Uri.parse("https://ubaya.cloud/flutter/160423046/login.php");
 
     try {
@@ -40,7 +38,6 @@ class _LoginPageState extends State<LoginPage> {
       final data = jsonDecode(response.body);
 
       if (response.statusCode == 200 && data['status'] == 'success') {
-        // Simpan data user ke SharedPreferences (Session)
         final prefs = await SharedPreferences.getInstance();
         await prefs.setInt('user_id', int.parse(data['data']['id'].toString()));
         await prefs.setString('username', data['data']['username']);
@@ -89,7 +86,6 @@ class _LoginPageState extends State<LoginPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Logo atau Icon Aplikasi Komiku
                 const Icon(
                   Icons.menu_book_rounded,
                   size: 100,
@@ -105,14 +101,8 @@ class _LoginPageState extends State<LoginPage> {
                     color: Colors.deepPurple,
                   ),
                 ),
-                const Text(
-                  "Membaca & Berbagi Komik Seru",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 16, color: Colors.grey),
-                ),
                 const SizedBox(height: 48),
 
-                // Input Username
                 TextFormField(
                   controller: _usernameController,
                   decoration: InputDecoration(
@@ -161,7 +151,6 @@ class _LoginPageState extends State<LoginPage> {
                 ),
                 const SizedBox(height: 24),
 
-                // Tombol Login
                 ElevatedButton(
                   onPressed: _isLoading ? null : _login,
                   style: ElevatedButton.styleFrom(
