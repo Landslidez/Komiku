@@ -1,6 +1,4 @@
-<?php
-header("Content-Type: application/json");
-header("Access-Control-Allow-Origin: *");
+<?php 
 require_once 'db.php';
 
 if (!isset($_GET['chapter_id'])) {
@@ -10,7 +8,7 @@ if (!isset($_GET['chapter_id'])) {
 
 $chapter_id = intval($_GET['chapter_id']);
 
-$query = "SELECT id, page FROM pages WHERE chapters_id = ? ORDER BY CAST(page AS UNSIGNED) ASC";
+$query = "SELECT id, page FROM pages WHERE chapters_id = ? ORDER BY id ASC";
 $stmt = $conn->prepare($query);
 $stmt->bind_param("i", $chapter_id);
 $stmt->execute();

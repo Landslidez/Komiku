@@ -1,4 +1,4 @@
-<?php //ambil semua kategori
+<?php 
 require_once 'db.php';
 
 $sql = "SELECT id, nama FROM categories";

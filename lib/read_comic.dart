@@ -69,22 +69,21 @@ class _ReadComicPageState extends State<ReadComicPage> {
                   padding: EdgeInsets.zero,
                   itemCount: _pages.length,
                   itemBuilder: (context, index) {
-                    final pageVal = _pages[index]['page']; 
-                    final String fileName = "$pageVal${widget.chapterId}";
+                    final String page = _pages[index]['page'];
 
-                    return Image.asset(
-                      '../lib/images/komik/$fileName.png',
+                    return Image.network(
+                      'https://ubaya.cloud/flutter/160423046/$page',
                       width: double.infinity,
                       fit: BoxFit.fitWidth,
                       errorBuilder: (context, error, stackTrace) {
                         return Container(
                           height: 250,
                           color: Colors.grey[900],
-                          child: Center(
+                          child: const Center(
                             child: Text(
-                              "Gambar tidak ditemukan:\nlib/images/komik/$fileName.jpg",
+                              "Gambar tidak dapat dimuat.",
                               textAlign: TextAlign.center,
-                              style: const TextStyle(color: Colors.white54),
+                              style: TextStyle(color: Colors.white54),
                             ),
                           ),
                         );

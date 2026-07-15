@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'read_comic.dart';
+import 'edit_comic.dart';
+import 'add_chapter.dart';
 
 class DetailPage extends StatefulWidget {
   final int comicId;
@@ -93,6 +95,94 @@ class _DetailPageState extends State<DetailPage> {
     }
   }
 
+  bool _isOwner() {
+    if (_comic == null || _comic!['users_id'] == null) return false;
+    return _comic!['users_id'].toString() == _currentUserId.toString();
+  }
+
+  Future<void> _openEdit() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditComicPage(comicId: widget.comicId),
+      ),
+    );
+    if (result == true) {
+      _fetchComicDetail();
+    }
+  }
+
+  Future<void> _openAddChapter() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AddChapterPage(comicId: widget.comicId),
+      ),
+    );
+    if (result == true) {
+      _fetchComicDetail();
+    }
+  }
+
+  void _confirmDelete() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) => AlertDialog(
+        title: const Text('Hapus Komik'),
+        content: const Text('Yakin ingin menghapus komik ini?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Batal'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _deleteComic();
+            },
+            child: const Text('Hapus', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _deleteComic() async {
+    final url = Uri.parse(
+      "https://ubaya.cloud/flutter/160423046/delete_comic.php",
+    );
+    try {
+      final response = await http.post(
+        url,
+        body: {
+          "comic_id": widget.comicId.toString(),
+          "user_id": _currentUserId.toString(),
+        },
+      );
+      final data = jsonDecode(response.body);
+      if (!mounted) return;
+      if (data['status'] == 'success') {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(data['message']),
+            backgroundColor: Colors.green,
+          ),
+        );
+        Navigator.pop(context, true);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(data['message'] ?? "Gagal menghapus komik.")),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("Error: $e")));
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
@@ -110,6 +200,20 @@ class _DetailPageState extends State<DetailPage> {
         title: Text(_comic?['title'] ?? "Detail Komik"),
         backgroundColor: const Color.fromARGB(255, 103, 58, 183),
         foregroundColor: Colors.white,
+        actions: [
+          if (_isOwner()) ...[
+            IconButton(
+              icon: const Icon(Icons.edit),
+              tooltip: "Edit Komik",
+              onPressed: _openEdit,
+            ),
+            IconButton(
+              icon: const Icon(Icons.delete),
+              tooltip: "Hapus Komik",
+              onPressed: _confirmDelete,
+            ),
+          ],
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -135,8 +239,8 @@ class _DetailPageState extends State<DetailPage> {
                   ),
                   clipBehavior: Clip.antiAlias,
                   child: poster.isNotEmpty
-                      ? Image.asset(
-                          '../lib/images/poster/$poster.png',
+                      ? Image.network(
+                          'https://ubaya.cloud/flutter/160423046/$poster',
                           fit: BoxFit.cover,
                         )
                       : const Icon(Icons.image, size: 50),
@@ -273,12 +377,21 @@ class _DetailPageState extends State<DetailPage> {
                       );
                     },
                   ),
+            if (_isOwner())
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: OutlinedButton.icon(
+                  onPressed: _openAddChapter,
+                  icon: const Icon(Icons.add),
+                  label: const Text("Tambah Chapter"),
+                ),
+              ),
             const Divider(height: 32),
 
             // Komentar Section
-            const Text(
-              "Komentar",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            Text(
+              "Komentar (${_comments.length})",
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Row(
@@ -315,8 +428,8 @@ class _DetailPageState extends State<DetailPage> {
                       return ListTile(
                         leading: CircleAvatar(
                           backgroundImage: pPic.isNotEmpty
-                              ? AssetImage(
-                                  '../lib/images/profile_pic/$pPic.png',
+                              ? NetworkImage(
+                                  'https://ubaya.cloud/flutter/160423046/$pPic',
                                 )
                               : null,
                           child: pPic.isEmpty ? const Icon(Icons.person) : null,

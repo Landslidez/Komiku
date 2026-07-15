@@ -1,12 +1,17 @@
-<?php 
+<?php //cari komik berdasar judul
 require_once 'db.php';
+
+$q = isset($_GET['q']) ? $_GET['q'] : '';
+$keyword = "%" . $q . "%";
 
 $query = "SELECT c.id, c.title, c.description, c.poster,
                  COALESCE(AVG(r.rate), 0) as average_rating
           FROM comics c
           LEFT JOIN rating r ON c.id = r.comics_id
+          WHERE c.title LIKE ?
           GROUP BY c.id";
 $stmt = $conn->prepare($query);
+$stmt->bind_param("s", $keyword);
 $stmt->execute();
 $result = $stmt->get_result();
 
@@ -21,4 +26,5 @@ echo json_encode([
     "data" => $comics
 ]);
 $stmt->close();
+$conn->close();
 ?>

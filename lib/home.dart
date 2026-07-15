@@ -6,6 +6,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'login_page.dart';
 import 'category.dart';
 import 'comic_detail.dart';
+import 'search_comic.dart';
+import 'create_comic.dart';
+import 'edit_profile.dart';
+import 'my_comics.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -114,7 +118,9 @@ class _HomePageState extends State<HomePage> {
               currentAccountPicture: CircleAvatar(
                 backgroundColor: Colors.white,
                 backgroundImage: _profilePic.isNotEmpty
-                    ? AssetImage('../lib/images/profile_pic/$_profilePic.png')
+                    ? NetworkImage(
+                        'https://ubaya.cloud/flutter/160423046/$_profilePic',
+                      )
                     : null,
                 child: _profilePic.isEmpty
                     ? const Icon(
@@ -124,6 +130,26 @@ class _HomePageState extends State<HomePage> {
                       )
                     : null,
               ),
+            ),
+
+            ListTile(
+              leading: const Icon(
+                Icons.manage_accounts,
+                color: Color.fromARGB(255, 103, 58, 183),
+              ),
+              title: const Text("Edit Profil"),
+              onTap: () async {
+                Navigator.pop(context);
+                final result = await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const EditProfilePage(),
+                  ),
+                );
+                if (result == true) {
+                  _loadUserData();
+                }
+              },
             ),
 
             ListTile(
@@ -160,6 +186,10 @@ class _HomePageState extends State<HomePage> {
               title: const Text("Cari Komik"),
               onTap: () {
                 Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const SearchPage()),
+                );
               },
             ),
 
@@ -168,8 +198,29 @@ class _HomePageState extends State<HomePage> {
             ListTile(
               leading: const Icon(Icons.add_box, color: Colors.green),
               title: const Text("Bagikan Komik Baru"),
+              onTap: () async {
+                Navigator.pop(context);
+                final result = await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const CreateComicPage(),
+                  ),
+                );
+                if (result == true) {
+                  _fetchAllComics();
+                }
+              },
+            ),
+
+            ListTile(
+              leading: const Icon(Icons.library_books, color: Colors.green),
+              title: const Text("Komik Saya"),
               onTap: () {
                 Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const MyComicsPage()),
+                );
               },
             ),
 
@@ -204,7 +255,7 @@ class _HomePageState extends State<HomePage> {
                 ),
                 itemBuilder: (context, index) {
                   final comic = _comics[index];
-                  final String posterName = comic['poster'] ?? "";
+                  final String poster = comic['poster'] ?? "";
 
                   return Card(
                     elevation: 3,
@@ -213,8 +264,8 @@ class _HomePageState extends State<HomePage> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: InkWell(
-                      onTap: () {
-                        Navigator.push(
+                      onTap: () async {
+                        await Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (context) => DetailPage(
@@ -222,14 +273,15 @@ class _HomePageState extends State<HomePage> {
                             ),
                           ),
                         );
+                        _fetchAllComics();
                       },
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           Expanded(
-                            child: posterName.isNotEmpty
-                                ? Image.asset(
-                                    '../lib/images/poster/$posterName.png',
+                            child: poster.isNotEmpty
+                                ? Image.network(
+                                    'https://ubaya.cloud/flutter/160423046/$poster',
                                     fit: BoxFit.cover,
                                     errorBuilder: (context, error, stackTrace) {
                                       return const Center(
@@ -251,15 +303,35 @@ class _HomePageState extends State<HomePage> {
                           ),
                           Padding(
                             padding: const EdgeInsets.all(8.0),
-                            child: Text(
-                              comic['title'] ?? "",
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
-                              ),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              textAlign: TextAlign.center,
+                            child: Column(
+                              children: [
+                                Text(
+                                  comic['title'] ?? "",
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                  ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  textAlign: TextAlign.center,
+                                ),
+                                const SizedBox(height: 4),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Icon(
+                                      Icons.star,
+                                      color: Colors.orange,
+                                      size: 14,
+                                    ),
+                                    const SizedBox(width: 2),
+                                    Text(
+                                      "${comic['average_rating'] ?? 0}",
+                                      style: const TextStyle(fontSize: 12),
+                                    ),
+                                  ],
+                                ),
+                              ],
                             ),
                           ),
                         ],

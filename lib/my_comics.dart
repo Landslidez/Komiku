@@ -1,37 +1,33 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'comic_detail.dart';
 
-class ComicCategoryPage extends StatefulWidget {
-  final int categoryId;
-  final String categoryName;
-
-  // Constructor menerima lemparan data ID & Nama Kategori
-  const ComicCategoryPage({
-    super.key,
-    required this.categoryId,
-    required this.categoryName,
-  });
+class MyComicsPage extends StatefulWidget {
+  const MyComicsPage({super.key});
 
   @override
-  State<ComicCategoryPage> createState() => _ComicCategoryPageState();
+  State<MyComicsPage> createState() => _MyComicsPageState();
 }
 
-class _ComicCategoryPageState extends State<ComicCategoryPage> {
+class _MyComicsPageState extends State<MyComicsPage> {
   List _comics = [];
   bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _fetchComicsByCategory();
+    _fetchMyComics();
   }
 
-  // Mengambil data komik yang terfilter lewat category_id
-  Future<void> _fetchComicsByCategory() async {
+  Future<void> _fetchMyComics() async {
+    setState(() => _isLoading = true);
+    final prefs = await SharedPreferences.getInstance();
+    final userId = prefs.getInt('user_id') ?? 0;
+
     final url = Uri.parse(
-      "https://ubaya.cloud/flutter/160423046/comic_category.php?category_id=${widget.categoryId}",
+      "https://ubaya.cloud/flutter/160423046/my_comics.php?user_id=$userId",
     );
     try {
       final response = await http.get(url);
@@ -42,17 +38,10 @@ class _ComicCategoryPageState extends State<ComicCategoryPage> {
             _comics = data['data'];
             _isLoading = false;
           });
-        } else {
-          setState(() {
-            _comics = [];
-            _isLoading = false;
-          });
         }
       }
     } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
+      setState(() => _isLoading = false);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -68,7 +57,7 @@ class _ComicCategoryPageState extends State<ComicCategoryPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Kategori: ${widget.categoryName}"),
+        title: const Text("Komik Saya"),
         backgroundColor: const Color.fromARGB(255, 103, 58, 183),
         foregroundColor: Colors.white,
       ),
@@ -79,7 +68,7 @@ class _ComicCategoryPageState extends State<ComicCategoryPage> {
               ),
             )
           : _comics.isEmpty
-          ? const Center(child: Text("Tidak ada komik di kategori ini."))
+          ? const Center(child: Text("Kamu belum membuat komik."))
           : Padding(
               padding: const EdgeInsets.all(8.0),
               child: GridView.builder(
@@ -110,7 +99,7 @@ class _ComicCategoryPageState extends State<ComicCategoryPage> {
                             ),
                           ),
                         );
-                        _fetchComicsByCategory();
+                        _fetchMyComics();
                       },
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
