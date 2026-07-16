@@ -87,7 +87,7 @@ class _LoginPageState extends State<LoginPage> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const Icon(
-                  Icons.menu_book_rounded,
+                  Icons.public_rounded,
                   size: 100,
                   color: Colors.deepPurple,
                 ),
@@ -100,6 +100,11 @@ class _LoginPageState extends State<LoginPage> {
                     fontWeight: FontWeight.bold,
                     color: Colors.deepPurple,
                   ),
+                ),
+                const Text(
+                  "Bukan komiku.org",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 16, color: Colors.grey),
                 ),
                 const SizedBox(height: 48),
 
